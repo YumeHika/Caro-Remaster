@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Caro_Remaster
+namespace Battle_Client
 {
     static class Program
     {
@@ -16,7 +16,7 @@ namespace Caro_Remaster
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Server());
+            Application.Run(new Battle_Client());
         }
     }
 }

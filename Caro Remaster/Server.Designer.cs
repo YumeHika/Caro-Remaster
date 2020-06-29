@@ -1,6 +1,6 @@
 ﻿namespace Caro_Remaster
 {
-    partial class Form1
+    partial class Server
     {
         /// <summary>
         /// Required designer variable.

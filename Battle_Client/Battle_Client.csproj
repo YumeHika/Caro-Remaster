@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ED80B3F6-5B8E-4D55-8114-1CFF5DD002A1}</ProjectGuid>
+    <ProjectGuid>{F09515C3-BA78-4388-B6E9-B89A42B0C2E6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Caro_Remaster</RootNamespace>
-    <AssemblyName>Caro Remaster</AssemblyName>
+    <RootNamespace>Battle_Client</RootNamespace>
+    <AssemblyName>Battle_Client</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -46,14 +46,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="Battle_Client.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Battle_Client.Designer.cs">
+      <DependentUpon>Battle_Client.cs</DependentUpon>
     </Compile>
+    <Compile Include="Chess_Board_Manager.cs" />
+    <Compile Include="Cons.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="PlayInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Battle_Client.resx">
+      <DependentUpon>Battle_Client.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -62,6 +69,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -75,6 +83,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Logo_Caro.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\O.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\X.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
