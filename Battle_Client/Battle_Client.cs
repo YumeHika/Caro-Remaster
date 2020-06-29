@@ -7,15 +7,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using SimpleTCP;
+using System.Net;
 
 namespace Battle_Client
 {
     public partial class Battle_Client : Form
     {
+        
         #region Properties
         Chess_Board_Manager ChessBoard;
         #endregion
-
+        
         public Battle_Client()
         {
             InitializeComponent();
@@ -98,5 +102,35 @@ namespace Battle_Client
                 e.Cancel = true;
             }
         }
+
+        private void btnSend_Click(object sender, EventArgs e)
+        {
+            client.WriteLineAndGetReply(txtMessage.Text, TimeSpan.FromSeconds(3));
+        }
+
+        private void txtHost_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+        SimpleTcpClient client;
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Battle_Client_Load(object sender, EventArgs e)
+        {
+            client = new SimpleTcpClient();
+            client.StringEncoder = Encoding.UTF8;
+            client.DataReceived += Client_DataReceived;
+        }
+
+        private void Client_DataReceived(object sender, SimpleTCP.Message e)
+        {
+            txtStatus.Invoke((MethodInvoker)delegate ()
+            {
+                txtStatus.Text += e.MessageString;
+            });
+        }
     }
-}
+    }
