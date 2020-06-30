@@ -11,15 +11,21 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-
+using System.Net.Configuration;
+using SimpleTCP;
 
 namespace Battle_Client
 {
+  
+
     public partial class Battle_Client : Form
     {
-        System.Net.Sockets.TcpClient clientSocket = new System.Net.Sockets.TcpClient();
-        NetworkStream serverStream = default(NetworkStream);
-        string readData = null;
+        private TcpClient client;
+        public StreamReader STR;
+        public StreamWriter STW;
+        public string recieve;
+        public String TextToSend;
+
 
         #region Properties
         Chess_Board_Manager ChessBoard;
@@ -27,7 +33,17 @@ namespace Battle_Client
 
         public Battle_Client()
         {
+
             InitializeComponent();
+            IPAddress[] localIP = Dns.GetHostAddresses(Dns.GetHostName());
+
+            foreach (IPAddress address in localIP)
+            {
+                if (address.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    ServerIPtextBox.Text = address.ToString();
+                }
+            }
 
             ChessBoard = new Chess_Board_Manager(pnlChessBoard, PlayerName_txb, Player_Ava_ptb);
             ChessBoard.Ended_Game += ChessBoard_Ended_Game; ;
@@ -108,60 +124,100 @@ namespace Battle_Client
             }
         }
 
-        private void btnSend_Click(object sender, EventArgs e)
+        private void Battle_Client_Load(object sender, EventArgs e)
         {
-            readData = "Conected to Chat Server ...";
-            msg();
-            clientSocket.Connect("127.0.0.1", 8888);
-            serverStream = clientSocket.GetStream();
-
-            byte[] outStream = System.Text.Encoding.ASCII.GetBytes(textBox3.Text + "$");
-            serverStream.Write(outStream, 0, outStream.Length);
-            serverStream.Flush();
-
-            Thread ctThread = new Thread(getMessage);
-            ctThread.Start();
+           
         }
-        private void getMessage()
+
+        
+
+        private void label3_Click(object sender, EventArgs e)
+        { }
+
+        private void StartButton_Click(object sender, EventArgs e)
         {
-            while (true)
+            TcpListener listener = new TcpListener(IPAddress.Any, int.Parse(ServerPorttextBox.Text));
+            listener.Start();
+            client = listener.AcceptTcpClient();
+            STR = new StreamReader(client.GetStream());
+            STW = new StreamWriter(client.GetStream());
+            STW.AutoFlush = true;
+
+            backgroundWorker1.RunWorkerAsync();
+            backgroundWorker2.WorkerSupportsCancellation = true;
+        }
+
+        private void ConnectButton_Click(object sender, EventArgs e)
+        {
+            client = new TcpClient();
+            IPEndPoint IpEnd = new IPEndPoint(IPAddress.Parse(ClientIPtextBox.Text), int.Parse(ClientPorttextBox.Text));
+
+            try
             {
-                serverStream = clientSocket.GetStream();
-                int buffSize = 0;
-                byte[] inStream = new byte[10025];
-                buffSize = clientSocket.ReceiveBufferSize;
-                serverStream.Read(inStream, 0, buffSize);
-                string returndata = System.Text.Encoding.ASCII.GetString(inStream);
-                readData = "" + returndata;
-                msg();
+                client.Connect(IpEnd);
+
+                if (client.Connected)
+                {
+                    ChatScreentextBox.AppendText("Connected to server" + "\n");
+                    STW = new StreamWriter(client.GetStream());
+                    STR = new StreamReader(client.GetStream());
+                    STW.AutoFlush = true;
+                    backgroundWorker1.RunWorkerAsync();
+                    backgroundWorker2.WorkerSupportsCancellation = true;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
             }
         }
 
-        private void msg()
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            if (this.InvokeRequired)
-                this.Invoke(new MethodInvoker(msg));
+            while (client.Connected)
+            {
+                try
+                {
+                    recieve = STR.ReadLine();
+                    this.ChatScreentextBox.Invoke(new MethodInvoker(delegate ()
+                    {
+                        ChatScreentextBox.AppendText("You:" + recieve + "\n");
+                    }));
+                    recieve = "";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message.ToString());
+                }
+            }
+        }
+
+        private void backgroundWorker2_DoWork(object sender, DoWorkEventArgs e)
+        {
+            if (client.Connected)
+            {
+                STW.WriteLine(TextToSend);
+                this.ChatScreentextBox.Invoke(new MethodInvoker(delegate ()
+                {
+                    ChatScreentextBox.AppendText("Me:" + TextToSend + "\n");
+                }));
+            }
             else
-                textBox1.Text = textBox1.Text + Environment.NewLine + " >> " + readData;
+            {
+                MessageBox.Show("Sending failed");
+            }
+            backgroundWorker2.CancelAsync();
         }
 
-
-
-
-        private void Battle_Client_Load(object sender, EventArgs e)
-        {}
-        private void label3_Click(object sender, EventArgs e)
-        {}
-        private void button1_Click(object sender, EventArgs e)
+        private void SendButton_Click(object sender, EventArgs e)
         {
-            byte[] outStream = System.Text.Encoding.ASCII.GetBytes(textBox2.Text + "$");
-            serverStream.Write(outStream, 0, outStream.Length);
-            serverStream.Flush();
-        }
-
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-
+            if (MessagetextBox.Text != "")
+            {
+                TextToSend = MessagetextBox.Text;
+                backgroundWorker2.RunWorkerAsync();
+            }
+            MessagetextBox.Text = "";
         }
     }
 }
