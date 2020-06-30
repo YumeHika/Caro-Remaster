@@ -8,18 +8,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using SimpleTCP;
 using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+
 
 namespace Battle_Client
 {
     public partial class Battle_Client : Form
     {
-        
+        System.Net.Sockets.TcpClient clientSocket = new System.Net.Sockets.TcpClient();
+        NetworkStream serverStream = default(NetworkStream);
+        string readData = null;
+
         #region Properties
         Chess_Board_Manager ChessBoard;
         #endregion
-        
+
         public Battle_Client()
         {
             InitializeComponent();
@@ -105,32 +110,58 @@ namespace Battle_Client
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            client.WriteLineAndGetReply(txtMessage.Text, TimeSpan.FromSeconds(3));
-        }
+            readData = "Conected to Chat Server ...";
+            msg();
+            clientSocket.Connect("127.0.0.1", 8888);
+            serverStream = clientSocket.GetStream();
 
-        private void txtHost_TextChanged(object sender, EventArgs e)
+            byte[] outStream = System.Text.Encoding.ASCII.GetBytes(textBox3.Text + "$");
+            serverStream.Write(outStream, 0, outStream.Length);
+            serverStream.Flush();
+
+            Thread ctThread = new Thread(getMessage);
+            ctThread.Start();
+        }
+        private void getMessage()
         {
-
+            while (true)
+            {
+                serverStream = clientSocket.GetStream();
+                int buffSize = 0;
+                byte[] inStream = new byte[10025];
+                buffSize = clientSocket.ReceiveBufferSize;
+                serverStream.Read(inStream, 0, buffSize);
+                string returndata = System.Text.Encoding.ASCII.GetString(inStream);
+                readData = "" + returndata;
+                msg();
+            }
         }
-        SimpleTcpClient client;
-        private void button1_Click(object sender, EventArgs e)
+
+        private void msg()
         {
-
+            if (this.InvokeRequired)
+                this.Invoke(new MethodInvoker(msg));
+            else
+                textBox1.Text = textBox1.Text + Environment.NewLine + " >> " + readData;
         }
+
+
+
 
         private void Battle_Client_Load(object sender, EventArgs e)
+        {}
+        private void label3_Click(object sender, EventArgs e)
+        {}
+        private void button1_Click(object sender, EventArgs e)
         {
-            client = new SimpleTcpClient();
-            client.StringEncoder = Encoding.UTF8;
-            client.DataReceived += Client_DataReceived;
+            byte[] outStream = System.Text.Encoding.ASCII.GetBytes(textBox2.Text + "$");
+            serverStream.Write(outStream, 0, outStream.Length);
+            serverStream.Flush();
         }
 
-        private void Client_DataReceived(object sender, SimpleTCP.Message e)
+        private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            txtStatus.Invoke((MethodInvoker)delegate ()
-            {
-                txtStatus.Text += e.MessageString;
-            });
+
         }
     }
-    }
+}

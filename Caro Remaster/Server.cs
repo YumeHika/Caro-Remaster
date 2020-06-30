@@ -14,6 +14,7 @@ namespace Caro_Remaster
 {
     public partial class Server : Form
     {
+        
         public Server()
         {
             InitializeComponent();
