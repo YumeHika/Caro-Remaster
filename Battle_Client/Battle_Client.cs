@@ -158,7 +158,7 @@ namespace Battle_Client
 
                 if (client.Connected)
                 {
-                    ChatScreentextBox.AppendText("Connected to server" + "\n");
+                    ChatScreentextBox.AppendText("Connected to server" + "\r\n");
                     STW = new StreamWriter(client.GetStream());
                     STR = new StreamReader(client.GetStream());
                     STW.AutoFlush = true;
@@ -182,7 +182,7 @@ namespace Battle_Client
                     recieve = STR.ReadLine();
                     this.ChatScreentextBox.Invoke(new MethodInvoker(delegate ()
                     {
-                        ChatScreentextBox.AppendText("You:" + recieve + "\n");
+                        ChatScreentextBox.AppendText("You:" + recieve + "\r\n");
                     }));
                     recieve = "";
                 }
@@ -200,7 +200,7 @@ namespace Battle_Client
                 STW.WriteLine(TextToSend);
                 this.ChatScreentextBox.Invoke(new MethodInvoker(delegate ()
                 {
-                    ChatScreentextBox.AppendText("Me:" + TextToSend + "\n");
+                    ChatScreentextBox.AppendText("Me:" + TextToSend + "\r\n");
                 }));
             }
             else
